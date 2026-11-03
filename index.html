@@ -32,6 +32,20 @@ small{display:block;color:var(--mut);font-size:12px;margin-top:20px;line-height:
   // 주소 예: ?app=tmap&n=업체명&x=126.880415&y=37.476048   (app=tmap 또는 kakao, x=경도, y=위도)
   var KAKAO_JS_KEY='cfb4ea1706c992c37efdecb65eeb53a5';
   var q=new URLSearchParams(location.search);
+  // 전화: ?tel=01012345678&n=이름  → 전화 앱이 번호가 들어간 채로 열림
+  var tel=(q.get('tel')||'').replace(/[^\d+]/g,'');
+  if(tel){
+    var who=(q.get('n')||'').slice(0,40);
+    document.getElementById('name').textContent=(who?who+' ':'')+tel.replace(/^(02|0\d{2})(\d{3,4})(\d{4})$/,'$1-$2-$3');
+    document.title='전화 '+tel;
+    document.getElementById('kakao').style.display='none';
+    var tb=document.getElementById('tmap');tb.textContent='📞 전화 걸기';tb.href='tel:'+tel;
+    document.querySelector('small').textContent='전화 앱이 바로 안 열리면 위 버튼을 눌러주세요.';
+    document.getElementById('msg').textContent='전화 앱을 여는 중…';
+    setTimeout(function(){location.href='tel:'+tel;},150);
+    setTimeout(function(){document.getElementById('msg').textContent='안 열렸으면 전화 걸기 버튼을 눌러주세요.';},2000);
+    return;
+  }
   var app=(q.get('app')||'tmap').toLowerCase();
   var n=(q.get('n')||'목적지').slice(0,60), x=parseFloat(q.get('x')), y=parseFloat(q.get('y'));
   var ok=isFinite(x)&&isFinite(y)&&x>124&&x<132&&y>33&&y<39.5;   // 한국 좌표만
