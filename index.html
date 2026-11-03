@@ -53,8 +53,18 @@ small{display:block;color:var(--mut);font-size:12px;margin-top:20px;line-height:
   document.getElementById('name').textContent=n;document.title=n+' 길안내';
   if(!ok){msg.textContent='좌표가 없어서 길안내를 할 수 없어요.';
     document.getElementById('tmap').style.display='none';document.getElementById('kakao').style.display='none';return;}
-  var t='tmap://route?rGoName='+encodeURIComponent(n)+'&rGoX='+x+'&rGoY='+y;
+  var AND=/Android/i.test(navigator.userAgent);
+  // 안드로이드는 intent 주소로 열어야 크롬이 앱을 확실히 띄움 (앱 없으면 플레이스토어)
+  function launch(scheme,path,pkg){return AND?('intent://'+path+'#Intent;scheme='+scheme+';package='+pkg+';end'):(scheme+'://'+path);}
+  var t=launch('tmap','route?rGoName='+encodeURIComponent(n)+'&rGoX='+x+'&rGoY='+y,'com.skt.tmap.ku');
+  var nv=launch('nmap','place?lat='+y+'&lng='+x+'&name='+encodeURIComponent(n)+'&appname=io.github.wovlf700code.go','com.nhn.android.nmap');
+  var nvWeb='https://map.naver.com/p/search/'+encodeURIComponent(q.get('a')||n);
   document.getElementById('tmap').href=t;
+  if(app==='naver'){var nb=document.getElementById('tmap');nb.textContent='네이버 지도에서 보기';nb.href=nv;nb.style.background='#03c75a';
+    document.getElementById('kakao').style.display='none';
+    var w=document.createElement('a');w.className='btn';w.href=nvWeb;w.textContent='앱이 없으면: 네이버 지도 웹으로';w.style.background='transparent';w.style.color='inherit';w.style.border='1px solid #ccc';nb.parentNode.insertBefore(w,nb.nextSibling);
+    msg.textContent='네이버 지도를 여는 중…';setTimeout(function(){location.href=nv;},150);
+    setTimeout(function(){if(/여는 중/.test(msg.textContent))msg.textContent='안 열렸으면 아래 버튼을 눌러주세요.';},2000);return;}
   function kakaoNavi(){
     try{
       if(!window.Kakao){msg.textContent='카카오 연결을 불러오지 못했어요. 잠시 뒤 다시 눌러주세요.';return;}
