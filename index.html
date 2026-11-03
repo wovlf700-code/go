@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>티맵 길안내</title>
+<style>
+:root{--bg:#f7f6f2;--fg:#1f1e1b;--mut:#6b6862;--line:#e3e0d8;--blue:#2f6bff}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1a18;--fg:#ece9e2;--mut:#a29e95;--line:#3a3834;--blue:#6f97ff}}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+main{max-width:420px;margin:0 auto;padding:40px 16px;text-align:center}
+h1{font-size:20px;margin:0 0 4px;overflow-wrap:anywhere}
+p{color:var(--mut);font-size:14px;margin:0 0 24px}
+a.btn{display:block;padding:16px;border-radius:14px;font-size:17px;font-weight:700;text-decoration:none;margin:10px 0}
+a.tmap{background:var(--blue);color:#fff}
+a.kakao{background:#fee500;color:#191919}
+small{display:block;color:var(--mut);font-size:12px;margin-top:20px;line-height:1.5}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="name">길안내</h1>
+  <p id="msg">티맵을 여는 중…</p>
+  <a class="btn tmap" id="tmap" href="#">티맵으로 길안내</a>
+  <a class="btn kakao" id="kakao" href="#">카카오맵으로 길안내</a>
+  <small>티맵이 바로 안 열리면 파란 버튼을 눌러주세요.<br>티맵이 없으면 카카오맵 버튼을 쓰세요.</small>
+</main>
+<script>
+(function(){
+  // 주소 예: ?n=업체명&x=126.880415&y=37.476048   (x=경도, y=위도)
+  var q=new URLSearchParams(location.search);
+  var n=(q.get('n')||'목적지').slice(0,60), x=parseFloat(q.get('x')), y=parseFloat(q.get('y'));
+  var ok=isFinite(x)&&isFinite(y)&&x>124&&x<132&&y>33&&y<39.5;   // 한국 좌표만
+  document.getElementById('name').textContent=n;
+  document.title=n+' 길안내';
+  if(!ok){document.getElementById('msg').textContent='좌표가 없어서 길안내를 할 수 없어요.';
+    document.getElementById('tmap').style.display='none';document.getElementById('kakao').style.display='none';return;}
+  var t='tmap://route?rGoName='+encodeURIComponent(n)+'&rGoX='+x+'&rGoY='+y;
+  var k='https://map.kakao.com/link/to/'+encodeURIComponent(n)+','+y+','+x;
+  document.getElementById('tmap').href=t;
+  document.getElementById('kakao').href=k;
+  setTimeout(function(){location.href=t;},150);
+  setTimeout(function(){document.getElementById('msg').textContent='안 열렸으면 아래 파란 버튼을 눌러주세요.';},1800);
+})();
+</script>
+</body>
+</html>
