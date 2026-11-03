@@ -4,44 +4,54 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
-<title>티맵 길안내</title>
+<title>길안내</title>
 <style>
-:root{--bg:#f7f6f2;--fg:#1f1e1b;--mut:#6b6862;--line:#e3e0d8;--blue:#2f6bff}
-@media (prefers-color-scheme:dark){:root{--bg:#1b1a18;--fg:#ece9e2;--mut:#a29e95;--line:#3a3834;--blue:#6f97ff}}
+:root{--bg:#f7f6f2;--fg:#1f1e1b;--mut:#6b6862;--blue:#2f6bff}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1a18;--fg:#ece9e2;--mut:#a29e95;--blue:#6f97ff}}
 html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
 main{max-width:420px;margin:0 auto;padding:40px 16px;text-align:center}
 h1{font-size:20px;margin:0 0 4px;overflow-wrap:anywhere}
 p{color:var(--mut);font-size:14px;margin:0 0 24px}
-a.btn{display:block;padding:16px;border-radius:14px;font-size:17px;font-weight:700;text-decoration:none;margin:10px 0}
-a.tmap{background:var(--blue);color:#fff}
-a.kakao{background:#fee500;color:#191919}
+.btn{display:block;width:100%;box-sizing:border-box;border:none;padding:16px;border-radius:14px;font:inherit;font-size:17px;font-weight:700;text-decoration:none;margin:10px 0;cursor:pointer}
+.tmap{background:var(--blue);color:#fff}
+.kakao{background:#fee500;color:#191919}
 small{display:block;color:var(--mut);font-size:12px;margin-top:20px;line-height:1.5}
 </style>
 </head>
 <body>
 <main>
   <h1 id="name">길안내</h1>
-  <p id="msg">티맵을 여는 중…</p>
+  <p id="msg">여는 중…</p>
   <a class="btn tmap" id="tmap" href="#">티맵으로 길안내</a>
-  <a class="btn kakao" id="kakao" href="#">카카오맵으로 길안내</a>
-  <small>티맵이 바로 안 열리면 파란 버튼을 눌러주세요.<br>티맵이 없으면 카카오맵 버튼을 쓰세요.</small>
+  <button class="btn kakao" id="kakao" type="button">카카오내비로 길안내</button>
+  <small>앱이 바로 안 열리면 원하는 버튼을 눌러주세요.</small>
 </main>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.8.4/kakao.min.js" crossorigin="anonymous"></script>
 <script>
 (function(){
-  // 주소 예: ?n=업체명&x=126.880415&y=37.476048   (x=경도, y=위도)
+  // 주소 예: ?app=tmap&n=업체명&x=126.880415&y=37.476048   (app=tmap 또는 kakao, x=경도, y=위도)
+  var KAKAO_JS_KEY='cfb4ea1706c992c37efdecb65eeb53a5';
   var q=new URLSearchParams(location.search);
+  var app=(q.get('app')||'tmap').toLowerCase();
   var n=(q.get('n')||'목적지').slice(0,60), x=parseFloat(q.get('x')), y=parseFloat(q.get('y'));
   var ok=isFinite(x)&&isFinite(y)&&x>124&&x<132&&y>33&&y<39.5;   // 한국 좌표만
-  document.getElementById('name').textContent=n;
-  document.title=n+' 길안내';
-  if(!ok){document.getElementById('msg').textContent='좌표가 없어서 길안내를 할 수 없어요.';
+  var msg=document.getElementById('msg');
+  document.getElementById('name').textContent=n;document.title=n+' 길안내';
+  if(!ok){msg.textContent='좌표가 없어서 길안내를 할 수 없어요.';
     document.getElementById('tmap').style.display='none';document.getElementById('kakao').style.display='none';return;}
   var t='tmap://route?rGoName='+encodeURIComponent(n)+'&rGoX='+x+'&rGoY='+y;
-  var k='https://map.kakao.com/link/to/'+encodeURIComponent(n)+','+y+','+x;
   document.getElementById('tmap').href=t;
-  document.getElementById('kakao').href=k;
-  setTimeout(function(){location.href=t;},150);
-  setTimeout(function(){document.getElementById('msg').textContent='안 열렸으면 아래 파란 버튼을 눌러주세요.';},1800);
+  function kakaoNavi(){
+    try{
+      if(!window.Kakao){msg.textContent='카카오 연결을 불러오지 못했어요. 잠시 뒤 다시 눌러주세요.';return;}
+      if(!Kakao.isInitialized())Kakao.init(KAKAO_JS_KEY);
+      Kakao.Navi.start({name:n,x:x,y:y,coordType:'wgs84'});
+    }catch(e){msg.textContent='카카오내비를 열지 못했어요: '+(e&&e.message?e.message:e);}
+  }
+  document.getElementById('kakao').addEventListener('click',kakaoNavi);
+  if(app==='kakao'){msg.textContent='카카오내비를 여는 중…';setTimeout(kakaoNavi,200);}
+  else{msg.textContent='티맵을 여는 중…';setTimeout(function(){location.href=t;},150);}
+  setTimeout(function(){if(/여는 중/.test(msg.textContent))msg.textContent='안 열렸으면 아래 버튼을 눌러주세요.';},2000);
 })();
 </script>
 </body>
