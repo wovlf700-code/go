@@ -47,6 +47,27 @@ small{display:block;color:var(--mut);font-size:12px;margin-top:20px;line-height:
     return;
   }
   var app=(q.get('app')||'tmap').toLowerCase();
+  var AND0=/Android/i.test(navigator.userAgent);
+  // 네이버 지도 경로: ?app=nroute&p=위도,경도,이름|위도,경도,이름|...  (앞은 경유지 최대 5곳, 마지막이 도착지, 출발=현재 위치)
+  if(app==='nroute'){
+    var pts=(q.get('p')||'').split('|').map(function(t){var a=t.split(',');return {y:parseFloat(a[0]),x:parseFloat(a[1]),n:decodeURIComponent(a.slice(2).join(',')||'')};})
+      .filter(function(o){return isFinite(o.x)&&isFinite(o.y)&&o.x>124&&o.x<132&&o.y>33&&o.y<39.5;}).slice(0,6);
+    var m0=document.getElementById('msg');document.getElementById('kakao').style.display='none';
+    if(!pts.length){m0.textContent='경로에 넣을 곳이 없어요.';document.getElementById('tmap').style.display='none';return;}
+    var d=pts[pts.length-1],via=pts.slice(0,-1);
+    var path='route/car?dlat='+d.y+'&dlng='+d.x+'&dname='+encodeURIComponent(d.n);
+    via.forEach(function(v,i){path+='&v'+(i+1)+'lat='+v.y+'&v'+(i+1)+'lng='+v.x+'&v'+(i+1)+'name='+encodeURIComponent(v.n);});
+    path+='&appname=io.github.wovlf700code.go';
+    var u=AND0?('intent://'+path+'#Intent;scheme=nmap;package=com.nhn.android.nmap;end'):('nmap://'+path);
+    document.getElementById('name').textContent=pts.length+'곳 경로';document.title='네이버 지도 경로';
+    var ol=document.createElement('ol');ol.style.cssText='text-align:left;font-size:15px;line-height:1.7;margin:0 0 16px;padding-left:22px';
+    pts.forEach(function(o,i){var li=document.createElement('li');li.textContent=o.n+(i===pts.length-1?' (도착)':' (경유)');ol.appendChild(li);});
+    m0.parentNode.insertBefore(ol,m0.nextSibling);
+    var nb=document.getElementById('tmap');nb.textContent='네이버 지도로 경로 열기';nb.href=u;nb.style.background='#03c75a';
+    m0.textContent='현재 위치에서 출발 · 네이버 지도를 여는 중…';setTimeout(function(){location.href=u;},200);
+    setTimeout(function(){if(/여는 중/.test(m0.textContent))m0.textContent='안 열렸으면 아래 버튼을 눌러주세요.';},2000);
+    return;
+  }
   var n=(q.get('n')||'목적지').slice(0,60), x=parseFloat(q.get('x')), y=parseFloat(q.get('y'));
   var ok=isFinite(x)&&isFinite(y)&&x>124&&x<132&&y>33&&y<39.5;   // 한국 좌표만
   var msg=document.getElementById('msg');
