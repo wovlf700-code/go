@@ -77,7 +77,7 @@ small{display:block;color:var(--mut);font-size:12px;margin-top:20px;line-height:
   var AND=/Android/i.test(navigator.userAgent);
   // 안드로이드는 intent 주소로 열어야 크롬이 앱을 확실히 띄움 (앱 없으면 플레이스토어)
   function launch(scheme,path,pkg){return AND?('intent://'+path+'#Intent;scheme='+scheme+';package='+pkg+';end'):(scheme+'://'+path);}
-  var t=launch('tmap','route?rGoName='+encodeURIComponent(n)+'&rGoX='+x+'&rGoY='+y,'com.skt.tmap.ku');
+  var t='tmap://route?goalname='+encodeURIComponent(n)+'&goalx='+x+'&goaly='+y+'&rGoName='+encodeURIComponent(n)+'&rGoX='+x+'&rGoY='+y   /* 갤럭시 테스트 4번 형식 */;
   var nv=launch('nmap','place?lat='+y+'&lng='+x+'&name='+encodeURIComponent(n)+'&appname=io.github.wovlf700code.go','com.nhn.android.nmap');
   var nvWeb='https://map.naver.com/p/search/'+encodeURIComponent(q.get('a')||n);
   document.getElementById('tmap').href=t;
