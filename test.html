@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>티맵 연결 테스트</title>
+<style>
+body{margin:0;background:#f7f6f2;color:#1f1e1b;font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+main{max-width:460px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:20px;margin:0 0 6px}
+p{font-size:14px;color:#6b6862;margin:0 0 18px;line-height:1.5}
+a{display:block;padding:14px;border-radius:12px;background:#2f6bff;color:#fff;font-weight:700;font-size:16px;text-decoration:none;margin:10px 0}
+a.g{background:#444}
+small{display:block;font-weight:400;font-size:12px;opacity:.85;margin-top:2px;word-break:break-all}
+.ua{font-size:11px;color:#999;word-break:break-all;margin-top:24px}
+</style>
+</head>
+<body>
+<main>
+<h1>티맵 연결 테스트</h1>
+<p>목적지: 나래회계법인 (가산동 에이스가산타워)<br>버튼을 <b>하나씩</b> 눌러보고, 티맵에 <b>도착지까지 채워지는 번호</b>를 알려주세요. 하나 해보고 뒤로 와서 다음 거 누르면 돼요.</p>
+<div id="list"></div>
+<div class="ua" id="ua"></div>
+</main>
+<script>
+var N='나래회계법인',X=126.880112,Y=37.476021,ADDR='서울 금천구 가산디지털1로 145';
+var e=encodeURIComponent, AND=/Android/i.test(navigator.userAgent), PKG='com.skt.tmap.ku';
+function it(path,scheme){return 'intent://'+path+'#Intent;scheme='+(scheme||'tmap')+';package='+PKG+';end';}
+var T=[
+ ['1',it('route?goalname='+e(N)+'&goalx='+X+'&goaly='+Y),'intent · route?goalname/goalx/goaly'],
+ ['2',it('?rGoName='+e(N)+'&rGoX='+X+'&rGoY='+Y),'intent · ?rGoName (route 없이)'],
+ ['3',it('route?rGoName='+e(N)+'&rGoX='+X+'&rGoY='+Y),'intent · route?rGoName'],
+ ['4','tmap://route?goalname='+e(N)+'&goalx='+X+'&goaly='+Y,'바로 · route?goalname'],
+ ['5','tmap://?rGoName='+e(N)+'&rGoX='+X+'&rGoY='+Y,'바로 · ?rGoName'],
+ ['6',it('search?name='+e(ADDR)),'intent · 주소 검색'],
+ ['7','geo:'+Y+','+X+'?q='+Y+','+X+'('+e(N)+')','geo (앱 고르기 창)','g']
+];
+var L=document.getElementById('list');
+T.forEach(function(t){var a=document.createElement('a');a.href=t[1];if(t[3])a.className=t[3];a.textContent=t[0]+'번';var s=document.createElement('small');s.textContent=t[2];a.appendChild(s);L.appendChild(a);});
+document.getElementById('ua').textContent=(AND?'안드로이드':'기타')+' · '+navigator.userAgent;
+</script>
+</body>
+</html>
